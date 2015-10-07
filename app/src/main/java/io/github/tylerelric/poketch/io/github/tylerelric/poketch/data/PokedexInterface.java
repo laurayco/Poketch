@@ -6,6 +6,8 @@ import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
 import com.couchbase.lite.Document;
 import com.couchbase.lite.Manager;
+import com.couchbase.lite.QueryEnumerator;
+import com.couchbase.lite.QueryOptions;
 import com.couchbase.lite.android.AndroidContext;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.OkHttpClient;
@@ -21,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import io.github.tylerelric.poketch.JSONUtilities;
 
@@ -52,17 +55,58 @@ implements Callback {
         manager = m;
     }
 
-    protected Database get_pkdx_database() {
+    public void get_pkdx_database() {
         try {
             database = manager.getDatabase("pkdx");
             if (database.getExistingDocument("pokedex")==null) {
                 seed_database();
             }
+            check_sprites();
             pkdx.on_database_ready(database);
         } catch(CouchbaseLiteException ex) {
-            Log.e("PokedexData","Couchbase Lite",ex);
+            Log.e("PokedexData", "Couchbase Lite", ex);
         }
-        return null;
+    }
+
+    private void check_sprites() {
+        try {
+            QueryEnumerator qe = database.createAllDocumentsQuery().run();
+            while(qe.hasNext()) {
+                Map<String,Object> data = qe.next().getDocument().getProperties();
+                String kind = (String)data.get("resource_uri");
+                if(kind.contains("/pokemon/")) {
+                    List<Map<String,Object>> sprites = (List<Map<String,Object>>)data.get("sprites");
+                    for(Map<String,Object> sprite:sprites) {
+                        final String uri = (String)sprite.get("resource_uri");
+                        if(database.getExistingDocument(uri)==null) {
+                            Request req = new Request.Builder().url("http://pokeapi.co/" + uri).build();
+                            web_client.newCall(req).enqueue(new Callback() {
+                                @Override
+                                public void onFailure(Request request, IOException e) {
+                                    //
+                                }
+
+                                @Override
+                                public void onResponse(Response response) throws IOException {
+                                    Document doc = database.getDocument(uri);
+                                    try {
+                                        JSONObject jobj = new JSONObject(response.body().string());
+                                        Map<String,Object> props = (Map<String,Object>) JSONUtilities.object_to_map(jobj);
+                                        doc.putProperties(props);
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    } catch (CouchbaseLiteException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+        } catch (CouchbaseLiteException e) {
+            e.printStackTrace();
+        }
     }
 
     void seed_database() {
@@ -123,7 +167,6 @@ implements Callback {
     public void onResponse(Response response) throws IOException {
         try {
             JSONObject species_data = new JSONObject(response.body().string());
-            Log.i("MainActivity", species_data.getString("name"));
             Map<String,Object> m = (Map<String, Object>) JSONUtilities.object_to_map(species_data);
             pending_species.add(m);
             if(pending_species.size()>=temp_pkdx.getJSONArray("pokemon").length()) {
