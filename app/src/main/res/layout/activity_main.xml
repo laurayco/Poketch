@@ -7,7 +7,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scrollbars="vertical"
-        android:id="@+id/main_recycle_view" >
+        android:id="@+id/main_recycle_view"
+        android:paddingRight="8dp"
+        android:paddingLeft="8dp">
 
     </android.support.v7.widget.RecyclerView>
 

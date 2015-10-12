@@ -1,47 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<android.support.v7.widget.CardView
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:fresco="http://schemas.android.com/apk/res-auto"
-    android:orientation="horizontal"
+    android:id="@+id/card_view"
+    android:layout_gravity="center"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_marginTop="8dp"
-    android:clipToPadding="false"
+    android:layout_height="200dp"
+    card_view:cardCornerRadius="4dp"
+    card_view:cardElevation="5dp"
     android:paddingLeft="16dp"
     android:paddingRight="16dp"
-    android:paddingBottom="8dp">
+    android:paddingTop="0dp"
+    android:paddingBottom="8dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
+    android:translationZ="1dp">
 
-    <android.support.v7.widget.CardView
-        xmlns:card_view="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/card_view"
-        android:layout_gravity="center"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        card_view:cardCornerRadius="4dp"
-        card_view:cardElevation="5dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:translationZ="1dp">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <com.facebook.drawee.view.SimpleDraweeView
-            android:id="@+id/species_list_image"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="fill_parent"
-            android:translationZ="5dp"
-            android:layout_marginTop="8dp"
-            android:layout_gravity="center_horizontal"
-            />
+            android:layout_height="200dp" >
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="New Text"
-            android:textSize="18dp"
-            android:id="@+id/textView"
-            android:translationZ="10dp" />
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:id="@+id/species_list_image"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:translationZ="5dp"
+                android:layout_marginTop="0dp"
+                android:layout_gravity="center_horizontal" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="New Text"
+                android:textSize="18dp"
+                android:id="@+id/textView"
+                android:translationZ="10dp"
+                android:background="#5b000000"
+                android:textColor="#FFEEEEEE"
+                android:gravity="right"
+                android:layout_gravity="bottom"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp" />
+        </FrameLayout>
 
-    </android.support.v7.widget.CardView>
+    </LinearLayout>
 
-</LinearLayout>
+</android.support.v7.widget.CardView>
