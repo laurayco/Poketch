@@ -2,6 +2,7 @@ package io.github.tylerelric.poketch;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
@@ -15,18 +16,12 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
-import com.couchbase.lite.Document;
 import com.couchbase.lite.Emitter;
 import com.couchbase.lite.Manager;
-import com.couchbase.lite.Mapper;
-import com.couchbase.lite.Reducer;
-import com.couchbase.lite.View;
 import com.couchbase.lite.android.AndroidContext;
 import com.facebook.common.executors.CallerThreadExecutor;
 import com.facebook.common.references.CloseableReference;
@@ -41,7 +36,6 @@ import com.facebook.imagepipeline.image.CloseableImage;
 import com.facebook.imagepipeline.request.BasePostprocessor;
 import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
-import com.facebook.stetho.Stetho;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -53,18 +47,28 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import io.github.tylerelric.poketch.io.github.tylerelric.poketch.data.MapReduceAdapter;
-import io.github.tylerelric.poketch.io.github.tylerelric.poketch.data.PokapiLoader;
+import io.github.tylerelric.poketch.data.MapReduceAdapter;
+import io.github.tylerelric.poketch.data.PokeapiLoader;
 
 public class MainActivity
 extends AppCompatActivity
+implements MapReduceAdapter.ResourceSelected
 {
 
-    PokapiLoader pi;
+    PokeapiLoader pi;
     Manager mgr = null;
     RecyclerView recycle;
+    SpeciesAdapter data_adapter;
 
-    public class SpeciesViewHolder extends RecyclerView.ViewHolder {
+    @Override
+    public void on_resource_selected(String uri) {
+        Log.i("MainActivity","Selected callback: " + uri);
+        Intent intent = new Intent(this, SpeciesDetail.class);
+        intent.putExtra("resource_uri", uri);
+        startActivity(intent);
+    }
+
+    public class SpeciesViewHolder extends RecyclerView.ViewHolder implements android.view.View.OnClickListener {
 
         TextView lbl;
         SimpleDraweeView img;
@@ -73,11 +77,14 @@ extends AppCompatActivity
         BasePostprocessor img_process;
         ImagePipeline imagePipeline;
         Context cntx;
+        String current_species;
+        MapReduceAdapter.ResourceSelected on_species_select;
 
         public void update_species(Map<String, Object> doc){
             lbl.setText((String) doc.get("name"));
             String url = (String)doc.get("sprite");
             if(!(url instanceof String)) return;
+            current_species = (String) doc.get("resource_uri");
             if(url.contains(".png")) {
                 url = "http://pokeapi.co" + url;
             } else {
@@ -91,7 +98,11 @@ extends AppCompatActivity
                             .setImageRequest(builder.build())
                             .setOldController(img.getController())
                             .build();
-            processImageWithPaletteApi(req,controller);
+            processImageWithPaletteApi(req, controller);
+        }
+
+        public void set_species_select_handler(MapReduceAdapter.ResourceSelected handle) {
+            on_species_select = handle;
         }
 
         private void processImageWithPaletteApi(ImageRequest request, DraweeController controller) {
@@ -130,6 +141,7 @@ extends AppCompatActivity
 
         public SpeciesViewHolder(android.view.View itemView,Context c ) {
             super(itemView);//http://pokeapi.co/media/img/1.png
+            itemView.setOnClickListener(this);
             lbl = (TextView)itemView.findViewById(R.id.textView);
             img = (SimpleDraweeView)itemView.findViewById(R.id.species_list_image);
             cv = (CardView)itemView.findViewById(R.id.card_view);
@@ -137,10 +149,18 @@ extends AppCompatActivity
             imagePipeline = Fresco.getImagePipeline();
             getAdapterPosition();
         }
+
+        @Override
+        public void onClick(android.view.View v) {
+            if(on_species_select!=null) {
+                on_species_select.on_resource_selected(current_species);
+            }
+        }
     }
 
     class SpeciesAdapter
-    extends MapReduceAdapter {
+    extends MapReduceAdapter implements MapReduceAdapter.ResourceSelected {
+        MapReduceAdapter.ResourceSelected on_species_select;
 
         protected SpeciesAdapter(Database db, Context c) {
             super(db, "home_view", "2", c);
@@ -255,7 +275,8 @@ extends AppCompatActivity
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
             android.view.View view = inflater.inflate(R.layout.species_listing, parent, false);
-            RecyclerView.ViewHolder vh = new SpeciesViewHolder(view,cntx);
+            SpeciesViewHolder vh = new SpeciesViewHolder(view,cntx);
+            vh.set_species_select_handler(this);
             return vh;
         }
 
@@ -265,6 +286,17 @@ extends AppCompatActivity
             if(holder==null)
                 return;
             svh.update_species(last_results.get(position));
+        }
+
+        @Override
+        public void on_resource_selected(String uri) {
+            if(on_species_select!=null) {
+                on_species_select.on_resource_selected(uri);
+            }
+        }
+
+        public void set_species_select_handler(MapReduceAdapter.ResourceSelected handle) {
+            on_species_select = handle;
         }
     }
 
@@ -276,9 +308,11 @@ extends AppCompatActivity
         recycle = (RecyclerView)findViewById(R.id.main_recycle_view);
         recycle.setLayoutManager(new LinearLayoutManager(this));
         try {
-            Stetho.initializeWithDefaults(this);
             mgr = new Manager(new AndroidContext(this),Manager.DEFAULT_OPTIONS);
-            pi = new PokapiLoader(mgr);
+            pi = new PokeapiLoader(mgr);
+            data_adapter = new SpeciesAdapter(pi.get_database(),this);
+            recycle.setAdapter(data_adapter);
+            data_adapter.set_species_select_handler(this);
         } catch(IOException e) {
             Log.e("MainActivity", "Error getting database manager.", e);
         } catch (CouchbaseLiteException e) {
@@ -290,17 +324,17 @@ extends AppCompatActivity
     protected void onStart() {
         super.onStart();
 
-        new Runnable() {
+        new Thread() {
             @Override
             public void run() {
-                pi.load_all(new PokapiLoader.ResourceAvailable() {
+                pi.load_all(new PokeapiLoader.ResourceAvailable() {
                     @Override
                     public void response(boolean success) {
-                        on_database_ready(pi.get_database());
+                        return;
                     }
                 });
             }
-        }.run();
+        }.start();
     }
 
     @Override
@@ -323,17 +357,6 @@ extends AppCompatActivity
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    public void on_database_ready(Database db) {
-        Log.i("MainActivity", "Database loaded. Documents: " + db.getName());
-        final RecyclerView.Adapter adap = new SpeciesAdapter(db,this);
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                recycle.setAdapter(adap);
-            }
-        });
     }
 
 }

@@ -1,4 +1,4 @@
-package io.github.tylerelric.poketch;
+package io.github.tylerelric.poketch.data;
 
 import org.json.JSONArray;
 import org.json.JSONException;

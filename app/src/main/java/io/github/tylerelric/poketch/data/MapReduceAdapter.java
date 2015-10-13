@@ -1,11 +1,9 @@
-package io.github.tylerelric.poketch.io.github.tylerelric.poketch.data;
+package io.github.tylerelric.poketch.data;
 
 import android.app.Activity;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.ViewGroup;
-import android.widget.ListView;
 
 import com.couchbase.lite.Database;
 import com.couchbase.lite.Emitter;
@@ -29,6 +27,10 @@ implements LiveQuery.ChangeListener, Mapper, Reducer  {
     QueryEnumerator current_data;
     protected final Context cntx;
     protected List<Map<String,Object>> last_results;
+
+    public interface ResourceSelected {
+        public void on_resource_selected(String uri);
+    }
 
     protected MapReduceAdapter(Database db, String viewname, String version, Context c) {
         super();
