@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fresco="http://schemas.android.com/tools"
+    android:id="@+id/card_view"
+    android:layout_gravity="center"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    card_view:cardCornerRadius="4dp"
+    card_view:cardElevation="5dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="16dp"
+    android:paddingBottom="16dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
+    android:translationZ="1dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="0dp"
+        android:paddingBottom="8dp">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/move_name"
+            style="@style/Base.TextAppearance.AppCompat.Large"
+            android:text="Move Name"/>
+        <TextView
+            android:text="Move Description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/move_description"
+            style="@style/Base.TextAppearance.AppCompat.Body1"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"/>
+        <TableLayout
+            android:layout_marginTop="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:stretchColumns="1"
+            android:dividerPadding="8dp">
+            <TableRow android:paddingTop="4dp" android:paddingBottom="4dp">
+                <TextView android:text="Power:" style="@style/Base.TextAppearance.AppCompat.Caption"/>
+                <TextView android:id="@+id/move_power" style="@style/Base.TextAppearance.AppCompat.Caption"
+                    android:layout_marginLeft="8dp" />
+            </TableRow>
+            <TableRow android:paddingTop="4dp" android:paddingBottom="4dp">
+                <TextView android:text="Accuracy:" style="@style/Base.TextAppearance.AppCompat.Caption"/>
+                <TextView android:id="@+id/move_accuracy" style="@style/Base.TextAppearance.AppCompat.Caption"
+                    android:layout_marginLeft="8dp" />
+            </TableRow>
+            <TableRow android:paddingTop="4dp" android:paddingBottom="4dp">
+                <TextView android:text="PP:" style="@style/Base.TextAppearance.AppCompat.Caption"/>
+                <TextView android:id="@+id/move_pp" style="@style/Base.TextAppearance.AppCompat.Caption"
+                    android:layout_marginLeft="8dp" />
+            </TableRow>
+        </TableLayout>
+    </LinearLayout>
+
+</android.support.v7.widget.CardView>

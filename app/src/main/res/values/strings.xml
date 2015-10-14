@@ -4,4 +4,5 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_species_detail">Detailed Species Information</string>
+    <string name="title_activity_species_results">SpeciesResults</string>
 </resources>

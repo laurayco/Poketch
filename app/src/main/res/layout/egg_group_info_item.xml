@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:padding="8dp"
-    android:layout_margin="3dp" >
+    android:layout_margin="3dp">
+    <com.facebook.drawee.view.SimpleDraweeView
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        fresco:actualImageScaleType="fitCenter"
+        fresco:placeholderImage="@drawable/egg"
+        android:id="@+id/type_sprite_holder"
+        android:textAlignment="center"
+        android:layout_gravity="center"
+        android:gravity="center"/>
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"

@@ -7,12 +7,16 @@
     android:paddingTop="8dp"
     android:paddingBottom="8dp"
     android:layout_height="56dp"
-    android:layout_width="fill_parent">
+    android:layout_width="0dp"
+    android:layout_gravity="center_vertical"
+    android:gravity="center_vertical">
     <com.facebook.drawee.view.SimpleDraweeView
         android:layout_width="56dp"
         android:layout_height="match_parent"
         fresco:actualImageScaleType="fitCenter"
-        fresco:placeholderImage="@drawable/normal"
+        fresco:placeholderImage="@drawable/egg"
+        android:layout_gravity="center_vertical"
+        android:gravity="center_vertical"
         android:id="@+id/type_sprite_holder"/>
     <TextView
         android:id="@+id/species_type_list_label"

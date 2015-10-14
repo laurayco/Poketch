@@ -47,8 +47,16 @@ public class PokeapiLoader {
         protected Resource(String rsrc,Database db) {
             resource_name = rsrc;
             database = db;
-            view = database.getView("all_"+resource_name);
-            view.setMap(this, "1");
+            view = database.getView(get_view_name());
+            view.setMap(this, get_version());
+        }
+
+        public String get_version(){
+            return "1";
+        }
+
+        public String get_view_name() {
+            return "all_"+resource_name;
         }
 
         protected Callback resource_page_download(final ResourceAvailable ra, final List<Map<String,Object>> store) {
@@ -188,6 +196,10 @@ public class PokeapiLoader {
                 }
             }
         }
+
+        public Database get_database() {
+            return database;
+        }
     }
 
     public class Pokemon extends Resource {
@@ -295,28 +307,28 @@ public class PokeapiLoader {
         descriptions.load(web_client,wb);
     }
 
-    public void get_pokemon(ResourceAvailable ra){
-        pokemon.load(web_client,ra);
+    public Resource get_pokemon(){
+        return pokemon;
     }
 
-    public void get_pokemon_types(ResourceAvailable ra){
-        pokemon_types.load(web_client,ra);
+    public Resource get_pokemon_types(){
+        return pokemon_types;
     }
 
-    public void get_moves(ResourceAvailable ra){
-        moves.load(web_client,ra);
+    public Resource get_moves(){
+        return moves;
     }
 
-    public void get_abilities(ResourceAvailable ra){
-        abilities.load(web_client,ra);
+    public Resource get_abilities(){
+        return abilities;
     }
 
-    public void get_egg_groups(ResourceAvailable ra){
-        egg_groups.load(web_client,ra);
+    public Resource get_egg_groups(){
+        return egg_groups;
     }
 
-    public void get_sprites(ResourceAvailable ra){
-        sprites.load(web_client,ra);
+    public Resource get_sprites(){
+        return sprites;
     }
 
     public Database get_database() {

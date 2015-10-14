@@ -51,6 +51,7 @@ import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -120,7 +121,6 @@ public class SpeciesDetail extends AppCompatActivity
 
         Intent intent = getIntent();
         species_uri = intent.getStringExtra("resource_uri");
-        Log.i("SpeciesDetail", species_uri);
 
         try {
             mgr = new Manager(new AndroidContext(this),Manager.DEFAULT_OPTIONS);
@@ -131,6 +131,19 @@ public class SpeciesDetail extends AppCompatActivity
             e.printStackTrace();
         }
 
+        findViewById(R.id.breed_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                launch_breeds();
+            }
+        });
+
+        findViewById((R.id.move_button)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                launch_moves();
+            }
+        });
 
         new Thread() {
             @Override
@@ -148,6 +161,29 @@ public class SpeciesDetail extends AppCompatActivity
                 });
             }
         }.start();
+    }
+
+    protected void launch_breeds() {
+        List<Object> eggs = (List<Object>) species_data.get("egg_groups");
+        Log.i("SpeciesDetail","Launch Breeds");
+        if(eggs!=null) {
+            Intent intent = new Intent(getApplicationContext(),SpeciesResults.class);
+            Map<String,Object> data = (Map<String,Object>)eggs.get(0);
+            intent.putExtra("resource_uri",data.get("resource_uri").toString());
+            intent.putExtra("query_field","pokemon");
+            intent.putExtra("origin",species_data.get("resource_uri").toString());
+            intent.putExtra("title","Breeding for " + species_data.get("name").toString());
+            startActivity(intent);
+        }
+    }
+
+    protected void launch_moves() {
+        Intent intent = new Intent(getApplicationContext(),SpeciesResults.class);
+        intent.putExtra("resource_uri",species_data.get("resource_uri").toString());
+        intent.putExtra("query_field","moves");
+        intent.putExtra("origin",species_data.get("resource_uri").toString());
+        intent.putExtra("title","Moveset for " + species_data.get("name").toString());
+        startActivity(intent);
     }
 
     private void processImageWithPaletteApi(ImageRequest request, DraweeController controller) {
