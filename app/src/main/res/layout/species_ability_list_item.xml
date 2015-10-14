@@ -1,14 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TableLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:id="@+id/species_ability_detail_item">
 
-    <TableRow>
+    <TableRow
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:layout_height="56dp"
+        android:layout_width="fill_parent">
         <TextView
             android:id="@+id/species_ability_list_item_name"
-        />
+            style="@style/Base.TextAppearance.AppCompat.Menu"
+            android:text="Ability"
+            android:layout_width="fill_parent" />
     </TableRow>
 
 </TableLayout>

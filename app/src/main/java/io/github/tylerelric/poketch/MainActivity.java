@@ -321,23 +321,6 @@ implements MapReduceAdapter.ResourceSelected
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-
-        new Thread() {
-            @Override
-            public void run() {
-                pi.load_all(new PokeapiLoader.ResourceAvailable() {
-                    @Override
-                    public void response(boolean success) {
-                        return;
-                    }
-                });
-            }
-        }.start();
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);

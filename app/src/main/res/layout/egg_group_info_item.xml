@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:padding="8dp"
+    android:layout_margin="3dp" >
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/egg_group_name"
+        style="@style/Base.TextAppearance.AppCompat.Body2"
+        android:text="Yoooo"
+        android:textAlignment="center"
+        android:layout_gravity="center"
+        android:gravity="center"/>
+
+</LinearLayout>

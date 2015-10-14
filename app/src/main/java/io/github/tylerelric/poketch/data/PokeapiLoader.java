@@ -159,8 +159,12 @@ public class PokeapiLoader {
 
         protected int page_limit = 0;
 
-        private String build_url(boolean download_all) {
-            return server + "/api/v1/" + resource_name + "?limit=" + ((download_all)?page_limit:1);
+        private String build_url(boolean download) {
+            if(download) {
+                return server + "/api/v1/" + resource_name + "?limit=" + page_limit;
+            } else {
+                return server + "/api/v1/" + resource_name + "?meta_only=true";
+            }
         }
 
         protected void save_data(String uid, final Map<String,Object> properties) throws CouchbaseLiteException {

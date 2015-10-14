@@ -25,6 +25,9 @@ import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.couchbase.lite.CouchbaseLiteException;
@@ -32,6 +35,7 @@ import com.couchbase.lite.Manager;
 import com.couchbase.lite.android.AndroidContext;
 import com.facebook.common.executors.CallerThreadExecutor;
 import com.facebook.common.references.CloseableReference;
+import com.facebook.common.util.UriUtil;
 import com.facebook.datasource.DataSource;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.backends.pipeline.PipelineDraweeController;
@@ -47,9 +51,11 @@ import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.annotation.Nullable;
 
@@ -64,52 +70,31 @@ public class SpeciesDetail extends AppCompatActivity
     Map<String,Object> species_sprite;
     String species_uri;
     ImagePipeline imagePipeline;
-    AbilityAdapter ability_adapter;
+
 
     CardView details;
     TextView details_txt;
 
-    class AbilityListViewHolder extends RecyclerView.ViewHolder {
-
-        TextView ability_name;
-
-        public AbilityListViewHolder(View itemView) {
-            super(itemView);
-            ability_name = (TextView)itemView.findViewById(R.id.species_ability_list_item_name);
-        }
-
-        public void update(Map<String,Object> data) {
-            ability_name.setText(data.get("name").toString());
-        }
-    }
-
-    class AbilityAdapter
-    extends RecyclerView.Adapter {
-
-        List<Map<String,Object>> data = new ArrayList<Map<String,Object>>();
-
-        public void setData(List<Map<String,Object>> data) {
-            this.data = data;
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            LayoutInflater inflater = (LayoutInflater) SpeciesDetail.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View convertView = inflater.inflate(R.layout.species_ability_list_item,parent,false);
-            return new AbilityListViewHolder(convertView);
-        }
-
-        @Override
-        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-            ((AbilityListViewHolder)holder).update(data.get(position));
-        }
-
-        @Override
-        public int getItemCount() {
-            return data.size();
-        }
-
+    private static final Map<String,Integer> type_icons = new HashMap<String,Integer>();
+    static {
+        type_icons.put("bug",R.drawable.bug);
+        type_icons.put("dark",R.drawable.dark);
+        type_icons.put("dragon",R.drawable.dragon);
+        type_icons.put("electric",R.drawable.electric);
+        type_icons.put("fairy",R.drawable.fairy);
+        type_icons.put("fighting",R.drawable.fighting);
+        type_icons.put("fire",R.drawable.fire);
+        type_icons.put("flying",R.drawable.flying);
+        type_icons.put("ghost",R.drawable.ghost);
+        type_icons.put("grass",R.drawable.grass);
+        type_icons.put("ground",R.drawable.ground);
+        type_icons.put("ice",R.drawable.ice);
+        type_icons.put("normal",R.drawable.normal);
+        type_icons.put("poison",R.drawable.poison);
+        type_icons.put("psychic",R.drawable.psycic);
+        type_icons.put("rock",R.drawable.rock);
+        type_icons.put("steel",R.drawable.steel);
+        type_icons.put("water",R.drawable.water);
     }
 
     @Override
@@ -145,6 +130,24 @@ public class SpeciesDetail extends AppCompatActivity
         } catch (CouchbaseLiteException e) {
             e.printStackTrace();
         }
+
+
+        new Thread() {
+            @Override
+            public void run() {
+            species_data = (Map<String, Object>) pi.get_database().getDocument(species_uri).getProperties();
+            List<Object> sprites = (List<Object>) species_data.get("sprites");
+            Map<String,Object> sprite_data = (Map<String, Object>) sprites.get(0);
+            String sprite_uri = (String) sprite_data.get("resource_uri");
+            species_sprite = (Map<String,Object>) pi.get_database().getDocument(sprite_uri).getProperties();
+            runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        show_species();
+                    }
+                });
+            }
+        }.start();
     }
 
     private void processImageWithPaletteApi(ImageRequest request, DraweeController controller) {
@@ -185,6 +188,8 @@ public class SpeciesDetail extends AppCompatActivity
     }
 
     protected void show_species() {
+        LayoutInflater inflater = getLayoutInflater();
+
         SimpleDraweeView sprite = ((SimpleDraweeView)findViewById(R.id.sprite_holder));
         TextView atk = ((TextView)findViewById(R.id.species_stats_atk)),
                 def = ((TextView)findViewById(R.id.species_stats_def)),
@@ -200,7 +205,6 @@ public class SpeciesDetail extends AppCompatActivity
 
         List<Object> abilities = (List<Object>) species_data.get("abilities");
         LinearLayout ability_list = ((LinearLayout)findViewById(R.id.species_ability_list));
-        LayoutInflater inflater = getLayoutInflater();
         for(Object o:abilities) {
             Map<String,Object> dat = (Map<String,Object>)o;
             if(dat!=null) {
@@ -212,12 +216,41 @@ public class SpeciesDetail extends AppCompatActivity
             }
         }
 
+        LinearLayout types_layout = (LinearLayout) findViewById(R.id.species_detail_type_information);
+        List<Object> types = (List<Object>) species_data.get("types");
+        for(Object o:types) {
+            Map<String,Object> dat = (Map<String,Object>)o;
+            if(dat!=null) {
+                LinearLayout type_layout = (LinearLayout) inflater.inflate(R.layout.pokemon_type_list_item,null);
+                String type_name = dat.get("name").toString();
+                Uri uri = new Uri.Builder().scheme(UriUtil.LOCAL_RESOURCE_SCHEME).path(String.valueOf(type_icons.get(type_name))).build();
+                ((SimpleDraweeView)type_layout.findViewById(R.id.type_sprite_holder)).setImageURI(uri);
+                ((TextView)type_layout.findViewById(R.id.species_type_list_label)).setText(type_name.substring(0,1).toUpperCase()+type_name.substring(1));
+                types_layout.addView(type_layout);
+            }
+        }
+
+
         hp.setText(species_data.get("hp").toString());
         atk.setText(species_data.get("attack").toString());
         def.setText(species_data.get("defense").toString());
         spatk.setText(species_data.get("sp_atk").toString());
         spdef.setText(species_data.get("sp_def").toString());
         speed.setText(species_data.get("speed").toString());
+
+        List<Object> egg_groups = (List<Object>) species_data.get("egg_groups");
+        TableRow egg_group_container = new TableRow(this);
+        for(Object o:egg_groups) {
+            Map<String,Object> dat = (Map<String,Object>)o;
+            if(o!=null) {
+                String egg_name = dat.get("name").toString();
+                View nv = inflater.inflate(R.layout.egg_group_info_item, null);
+                TextView tv = (TextView)nv.findViewById(R.id.egg_group_name);
+                tv.setText(egg_name);
+                egg_group_container.addView(nv);
+            }
+        }
+        ((TableLayout)findViewById(R.id.egg_group_info_container)).addView(egg_group_container);
 
         String url = PokeapiLoader.server + ((String) species_sprite.get("image"));
         Log.i("SpeciesDetail",url);
@@ -238,22 +271,6 @@ public class SpeciesDetail extends AppCompatActivity
     @Override
     public void onStart() {
         super.onStart();
-        new Thread() {
-            @Override
-            public void run() {
-            species_data = (Map<String, Object>) pi.get_database().getDocument(species_uri).getProperties();
-            List<Object> sprites = (List<Object>) species_data.get("sprites");
-            Map<String,Object> sprite_data = (Map<String, Object>) sprites.get(0);
-            String sprite_uri = (String) sprite_data.get("resource_uri");
-            species_sprite = (Map<String,Object>) pi.get_database().getDocument(sprite_uri).getProperties();
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    show_species();
-                }
-            });
-            }
-        }.start();
     }
 
 }
